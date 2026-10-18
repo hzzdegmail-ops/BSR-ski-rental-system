@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnySQLiteColumn,
   index,
   integer,
   real,
@@ -37,7 +38,7 @@ export const customerFitProfiles = sqliteTable("customer_fit_profile", {
   weightKg: real("weight_kg"),
   footLengthMm: integer("foot_length_mm"),
   shoeSize: real("shoe_size"),
-  skillLevel: text("skill_level").notNull().default("BEGINNER"),
+  skillLevel: text("skill_level"),
   equipmentPreference: text("equipment_preference"),
   updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
@@ -46,7 +47,7 @@ export const repairContractors = sqliteTable("repair_contractor", {
   id: integer("contractor_id").primaryKey({ autoIncrement: true }),
   code: text("contractor_code").notNull().unique(),
   name: text("name").notNull(),
-  contactPhone: text("contact_phone"),
+  contactPhone: text("contact_phone").notNull(),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
 });
 
@@ -117,8 +118,8 @@ export const equipmentModels = sqliteTable("equipment_model", {
   brand: text("brand").notNull(),
   modelName: text("model_name").notNull(),
   sizeSpec: text("size_spec").notNull(),
-  skillLevel: text("skill_level").notNull(),
-  compatibilityRule: text("compatibility_rule").notNull().default("{}"),
+  skillLevel: text("skill_level"),
+  compatibilityRule: text("compatibility_rule"),
 });
 
 export const equipment = sqliteTable(
@@ -133,10 +134,9 @@ export const equipment = sqliteTable(
       .notNull()
       .references(() => stores.id),
     status: text("status").notNull().default("AVAILABLE"),
-    conditionGrade: text("condition_grade").notNull().default("A"),
     acquiredAt: text("acquired_at").notNull(),
     retiredAt: text("retired_at"),
-    version: integer("version").notNull().default(1),
+    version: integer("version").notNull().default(0),
   },
   (table) => [index("idx_equipment_store_status_model").on(table.currentStoreId, table.status, table.modelId)],
 );
@@ -152,7 +152,7 @@ export const equipmentLocationHistory = sqliteTable(
     toStoreId: integer("to_store_id")
       .notNull()
       .references(() => stores.id),
-    contractId: integer("contract_id"),
+    contractId: integer("contract_id").references(() => rentalContracts.id),
     recordedByUserId: integer("recorded_by_user_id")
       .notNull()
       .references(() => userAccounts.id),
@@ -181,11 +181,10 @@ export const rentalContracts = sqliteTable(
     returnStoreId: integer("return_store_id").references(() => stores.id),
     startAt: text("start_at").notNull(),
     endAt: text("end_at").notNull(),
-    returnedAt: text("returned_at"),
     status: text("status").notNull(),
-    amountDue: real("amount_due").notNull(),
+    amountDue: real("amount_due").notNull().default(0),
     priceSnapshot: text("price_snapshot").notNull(),
-    version: integer("version").notNull().default(1),
+    version: integer("version").notNull().default(0),
   },
   (table) => [index("idx_rental_contract_status_end").on(table.status, table.endAt)],
 );
@@ -200,7 +199,9 @@ export const rentalItems = sqliteTable(
     equipmentId: integer("equipment_id")
       .notNull()
       .references(() => equipment.id),
-    replacesItemId: integer("replaces_item_id"),
+    replacesItemId: integer("replaces_item_id").references(
+      (): AnySQLiteColumn => rentalItems.id,
+    ),
     rentedFrom: text("rented_from").notNull(),
     rentedTo: text("rented_to"),
     quotedPrice: real("quoted_price").notNull(),
@@ -253,15 +254,11 @@ export const repairOrders = sqliteTable(
     createdByUserId: integer("created_by_user_id")
       .notNull()
       .references(() => userAccounts.id),
-    responsibleStoreId: integer("responsible_store_id")
-      .notNull()
-      .references(() => stores.id),
     status: text("status").notNull(),
-    severity: text("severity").notNull(),
     faultDescription: text("fault_description").notNull(),
     openedAt: text("opened_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     completedAt: text("completed_at"),
-    version: integer("version").notNull().default(1),
+    version: integer("version").notNull().default(0),
   },
   (table) => [index("idx_repair_order_status_contractor").on(table.status, table.contractorId)],
 );
