@@ -1,0 +1,65 @@
+@startuml
+hide footbox
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam ArrowColor #315E57
+skinparam ParticipantBorderColor #315E57
+skinparam ParticipantBackgroundColor #D8EEE5
+skinparam LifeLineBorderColor #789D94
+autonumber
+
+actor "门店员工" as Clerk
+boundary "接待与装备推荐界面" as UI
+control "接待顾客并推荐装备控制" as Control
+entity "顾客" as Customer
+entity "预约与办理任务" as ServiceTask
+entity "装备" as Equipment
+entity "租赁合同" as Contract
+entity "门店" as Store
+
+Clerk -> UI : 提交提前预订或实际到店信息
+UI -> Control : 接待顾客并推荐装备(接待信息)
+activate Control
+Control -> ServiceTask : 查找预约(预约号)
+ServiceTask --> Control : 返回顾客、预约与已有适配资料
+alt 提前预订选装
+Control -> ServiceTask : 建立预订办理任务（不登记到店）
+else 实际到店
+Control -> ServiceTask : 建立或转换现场任务并加入队列
+end
+ServiceTask --> Control : 返回任务（现场接待另返排队顺序）
+Control --> UI : 返回顾客资料与办理类型
+UI --> Clerk : 展示办理资料
+alt 已有确认预订且实际到店
+Control -> Contract : 读取原合同与预订装备
+Contract --> Control : 返回原合同、费用与适配资料
+Control --> UI : 展示原合同，核对试穿后转取件
+else 提前预订选装或现场新租
+Clerk -> UI : 提交选装条件(任务号、身体参数、技能、偏好、租期)
+UI -> Control : 开始办理并查询装备(任务号、查询条件)
+Control -> ServiceTask : 更新对应类型的办理阶段()
+Control -> ServiceTask : 更新适配与选装环节（保留原队号）
+Control -> Customer : 获取适配信息(顾客编号、身体参数)
+Customer --> Control : 返回完整适配信息
+Control -> Equipment : 查询可租装备(类别、尺码、租期、门店)
+Equipment --> Control : 返回候选装备
+Control -> Contract : 检查租期冲突(候选装备、租期)
+Contract --> Control : 返回无冲突装备
+Control -> Equipment : 验证安全状态(候选装备)
+Equipment --> Control : 返回安全状态有效的装备
+Control -> Equipment : 验证部件兼容(安全装备)
+Equipment --> Control : 返回部件兼容的装备
+Control -> Equipment : 生成适配建议(兼容装备、适配信息)
+Equipment --> Control : 返回推荐顺序、适配理由与安全提示
+Control -> Store : 获取装备位置(适配装备)
+Store --> Control : 返回所在门店
+Control -> Contract : 计算应付金额(推荐装备、租期)
+Contract --> Control : 返回价格明细
+Control -> ServiceTask : 更新当前环节(待合同确认)
+Control --> UI : 返回推荐装备、理由、门店、安全提示和价格
+end
+deactivate Control
+UI --> Clerk : 反馈查询结果
+@enduml

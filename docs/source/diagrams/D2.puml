@@ -1,0 +1,101 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.1
+skinparam EntityBorderColor #315E57
+skinparam EntityBackgroundColor #FFFFFF
+skinparam EntityFontColor #173F39
+hide circle
+
+entity "CUSTOMER" as Customer #EAF6FB {
+  [PK] customer_id : BIGINT
+  [UQ] phone : VARCHAR(30)
+  --
+  name : NVARCHAR(100) NOT NULL
+  email : VARCHAR(255)
+  created_at : TIMESTAMP
+}
+
+entity "CUSTOMER_FIT_PROFILE" as FitProfile #EAF6FB {
+  [PK] profile_id : BIGINT
+  [FK][UQ] customer_id : BIGINT
+  --
+  height_cm : DECIMAL(5,2)
+  weight_kg : DECIMAL(5,2)
+  foot_length_mm : SMALLINT
+  shoe_size : DECIMAL(4,1)
+  skill_level : VARCHAR(20)
+  equipment_preference : NVARCHAR(255)
+  updated_at : TIMESTAMP
+}
+
+entity "STORE" as Store #EEF7F2 {
+  [PK] store_id : BIGINT
+  [UQ] store_code : VARCHAR(20)
+  --
+  name : NVARCHAR(100) NOT NULL
+  address : NVARCHAR(255)
+  active : BOOLEAN
+}
+
+entity "USER_ACCOUNT" as UserAccount #EEF7F2 {
+  [PK] user_id : BIGINT
+  [UQ] username : VARCHAR(80)
+  [FK] store_id : BIGINT NULL
+  [FK] contractor_id : BIGINT NULL
+  --
+  role_type : VARCHAR(30)
+  display_name : NVARCHAR(100)
+  active : BOOLEAN
+  last_login_at : TIMESTAMP NULL
+}
+
+entity "SERVICE_RESERVATION" as Reservation #FFF3DF {
+  [PK] reservation_id : BIGINT
+  [UQ] reservation_no : VARCHAR(40)
+  [FK] customer_id : BIGINT
+  [FK] store_id : BIGINT
+  --
+  appointment_at : TIMESTAMP NULL
+  requirements : JSON/TEXT NULL
+  preparation : JSON/TEXT NULL
+  version : INTEGER
+  requested_start_at : TIMESTAMP
+  requested_end_at : TIMESTAMP
+  source_type : VARCHAR(20)
+  status : VARCHAR(30)
+  created_at : TIMESTAMP
+}
+
+entity "SERVICE_TASK" as Task #FFF3DF {
+  [PK] task_id : BIGINT
+  [FK] reservation_id : BIGINT NULL
+  [FK] customer_id : BIGINT
+  [FK] store_id : BIGINT
+  [FK] assigned_user_id : BIGINT NULL
+  --
+  task_type : VARCHAR(20)
+  queue_no : INTEGER
+  current_stage : VARCHAR(30)
+  status : VARCHAR(30)
+  enqueued_at : TIMESTAMP NULL
+  recommendation_revision : INTEGER
+  started_at : TIMESTAMP
+  finished_at : TIMESTAMP NULL
+}
+
+Customer ||--o| FitProfile
+Customer ||--o{ Reservation
+Store ||--o{ Reservation
+Reservation |o--o{ Task
+Customer ||--o{ Task
+Store ||--o{ Task
+Store |o--o{ UserAccount
+UserAccount |o--o{ Task
+
+@enduml

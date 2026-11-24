@@ -1,0 +1,71 @@
+@startuml
+hide footbox
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+actor "门店员工" as Clerk
+boundary "合同与收费界面" as UI
+control "创建合同并收费控制" as S
+entity "租赁合同" as Contract
+entity "装备" as Equipment
+entity "支付" as Payment
+boundary "支付服务接口（模拟）" as Pay
+entity "审计事件" as Audit
+entity "预约与办理任务" as Task
+Clerk -> UI : 提交提前预订或现场装备方案
+UI -> S : 生成合同摘要
+S -> Equipment : 核验适配、安全和占用
+S -> Contract : 计算合同费用
+S --> UI : 显示价格和租赁规则
+Clerk -> UI : 确认合同
+UI -> S : 提交收费
+S -> Contract : 建立待支付合同
+S -> Equipment : 临时锁定装备
+S -> Payment : 建立唯一支付请求
+S -> Pay : 按请求号模拟收费
+Pay --> S : 返回支付结果
+S -> Payment : 保存结果和流水
+alt 支付成功
+  S -> Contract : 确认合同
+  S -> Equipment : 按租期标记已预留
+  S -> Task : 提前预订完成预订任务；现场任务转待取件
+else 支付失败或占用到期
+  S -> Contract : 取消合同
+  S -> Equipment : 释放占用
+else 仍在处理中
+  S --> UI : 提示用原请求号查询或重试
+end
+S -> Audit : 记录支付及合同状态变化
+S --> UI : 展示结果及模拟凭证
+opt 已确认、实际到店并处于取件租期
+  Clerk -> UI : 现场交付
+  UI -> S : 确认取件
+  S -> Task : 核对原任务；允许合同取件门店交付
+  S -> Equipment : 核对尺寸、技能、实物、门店与安全
+  S -> Equipment : 标记租出
+  S -> Task : 实际交付后完成现场任务与预约
+  S -> Contract : 标记租出
+  S -> Audit : 记录装备交付
+end
+opt 未取件取消
+  Clerk -> UI : 提交取消
+  UI -> S : 处理未取件合同
+  opt 已收费
+    S -> Payment : 建立或复用退款请求
+    S -> Pay : 模拟退款
+    Pay --> S : 返回退款结果
+    S -> Payment : 保存退款结果
+  end
+  opt 未收费或退款成功
+    S -> Contract : 标记已取消
+    S -> Equipment : 释放占用
+  end
+  S -> Audit : 记录取消处理结果
+  S --> UI : 展示已取消或退款待处理
+end
+@enduml

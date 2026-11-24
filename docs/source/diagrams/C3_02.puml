@@ -1,0 +1,22 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+state "待支付" as P
+state "已确认" as C
+state "租出" as O
+state "已取消" as X
+[*] --> P : 核对合同后锁定装备
+P --> P : 模拟支付处理中 / 复用请求号
+P --> C : 支付成功 / 装备已预留
+P --> X : 支付失败或保留到期 / 释放
+C --> O : 取件门店核对并交付
+C --> X : 未取件取消且退款成功
+X --> P : 办理任务仍有效时重新确认
+O --> [*] : 转入在租处理
+@enduml

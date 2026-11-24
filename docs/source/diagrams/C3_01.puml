@@ -1,0 +1,39 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+state "预订选装中" as BW
+state "预订待合同确认" as BC
+state "预订已确认（未到店）" as BP
+state "排队中" as Q
+state "办理中" as W
+state "待合同确认" as C
+state "已取消" as X
+state "待取件" as P
+state "已完成" as D
+[*] --> BW : 提前选装
+BW --> BC : 完整推荐方案
+BC --> BP : 模拟付款成功
+BC --> BW : 付款失败或占用到期
+BW --> X : 取消预约
+BP --> X : 未取件取消且退款成功
+BP --> Q : 确认实际到店
+[*] --> Q : 现场到店登记
+Q --> W : 开始办理
+W --> C : 得到有效推荐
+C --> C : 重新推荐仍有完整方案
+C --> W : 重新推荐无完整方案
+C --> P : 现场新租模拟收费成功
+P --> D : 核对并交付 / 取件后可试装
+W --> D : 已预订装备核对试穿并交付
+Q --> X : 取消排队
+W --> X : 取消办理
+C --> X : 取消办理或支付占用到期
+X --> [*]
+D --> [*]
+@enduml

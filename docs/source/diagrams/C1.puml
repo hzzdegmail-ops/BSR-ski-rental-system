@@ -1,0 +1,276 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.1
+skinparam ClassBorderColor #315E57
+skinparam ClassBackgroundColor #F4FBF8
+skinparam ClassHeaderBackgroundColor #D8EEE5
+skinparam ClassFontColor #173F39
+skinparam ClassAttributeIconSize 0
+skinparam PackageBorderColor #9DBDB4
+skinparam PackageBackgroundColor #FBFDFC
+skinparam PackageFontColor #173F39
+skinparam packageStyle rectangle
+hide circle
+hide empty members
+
+package "边界类（交互层）" as BoundaryLayer {
+  class "接待与装备推荐界面" as QueryUI <<boundary>> {
+    + 登记与变更预约()
+    + 展示准备方案()
+    + 接待顾客()
+    + 展示顾客与队列状态()
+    + 开始办理并提交条件()
+    + 展示推荐与价格明细()
+  }
+  class "合同与收费界面" as CreateUI <<boundary>> {
+    + 提交租赁信息()
+    + 提交合同确认()
+    + 展示合同与支付结果()
+  }
+  class "换装与归还界面" as ReturnUI <<boundary>> {
+    + 提交识别信息()
+    + 提交处理信息()
+    + 反馈办理结果()
+  }
+  class "维修工单提交界面" as SubmitRepairUI <<boundary>> {
+    + 提交维修申请()
+    + 反馈办理结果()
+  }
+  class "维修进度界面" as RepairUI <<boundary>> {
+    + 提交维修进度()
+    + 反馈更新结果()
+  }
+  class "经营与待办界面" as ReportUI <<boundary>> {
+    + 提交统计条件()
+    + 展示指标与待办()
+  }
+  class "支付服务接口（模拟）" as PaymentGateway <<boundary>> {
+    + 请求收费()
+    + 请求补款或退款()
+    + 接收支付结果()
+  }
+
+  QueryUI -right[hidden]-> CreateUI
+  CreateUI -right[hidden]-> ReturnUI
+  ReturnUI -right[hidden]-> SubmitRepairUI
+  SubmitRepairUI -right[hidden]-> RepairUI
+  RepairUI -right[hidden]-> ReportUI
+}
+
+package "控制类（用例协调层）" as ControlLayer {
+  class "接待顾客并推荐装备控制" as QueryControl <<control>> {
+    + 管理预约与提前预订()
+    + 提前准备方案()
+    + 接待顾客并推荐装备()
+    + 开始办理并查询装备()
+  }
+  class "创建合同并收费控制" as CreateControl <<control>> {
+    + 创建合同并收费()
+    + 完成合同确认()
+  }
+  class "办理换装与归还控制" as ReturnControl <<control>> {
+    + 识别在租合同()
+    + 办理换装与归还()
+  }
+  class "提交维修工单控制" as SubmitRepairControl <<control>> {
+    + 提交维修工单()
+  }
+  class "更新维修进度控制" as UpdateRepairControl <<control>> {
+    + 更新维修进度()
+  }
+  class "查看经营与待办控制" as ReportControl <<control>> {
+    + 查看经营与待办()
+  }
+
+  QueryControl -right[hidden]-> CreateControl
+  CreateControl -right[hidden]-> ReturnControl
+  ReturnControl -right[hidden]-> SubmitRepairControl
+  SubmitRepairControl -right[hidden]-> UpdateRepairControl
+  UpdateRepairControl -right[hidden]-> ReportControl
+}
+
+package "实体类（业务层）" as EntityLayer {
+  together {
+  class "顾客" as Customer <<entity>> {
+    - 顾客编号
+    - 身高与体重
+    - 脚长与鞋码
+    - 技能水平
+    - 装备偏好
+    + 验证顾客()
+    + 获取适配信息()
+  }
+  class "门店" as Store <<entity>> {
+    - 门店编号
+    - 名称
+    + 获取装备位置()
+  }
+  class "预约与办理任务" as ServiceTask <<entity>> {
+    - 预约号与预计到店
+    - 预约需求与准备方案
+    - 办理类型与排队序号
+    - 当前环节
+    - 办理状态
+    - 到店、开始与交付时间
+    + 查找预约()
+    + 登记现场顾客()
+    + 加入办理队列()
+    + 开始办理()
+    + 更新当前环节()
+    + 实际交付后完成办理()
+    + 提供排队与办理数据()
+  }
+  class "租赁合同" as Contract <<entity>> {
+    - 合同号
+    - 开始时间
+    - 结束时间
+    - 合同状态
+    - 应付金额
+    - 价格明细
+    + 检查租期冲突()
+    + 建立待支付合同()
+    + 计算应付金额()
+    + 计算换装价差()
+    + 计算归还费用调整()
+    + 确认合同()
+    + 查找租出合同()
+    + 记录归还结果()
+    + 记录换装结果()
+    + 提供租赁数据()
+  }
+  class "装备" as Equipment <<entity>> {
+    - 装备编号
+    - 装备类别与尺码
+    - 技能等级
+    - 当前状态
+    - 所在门店
+    - 安全检查有效期
+    + 查询可租装备()
+    + 生成适配建议()
+    + 验证安全状态()
+    + 验证部件兼容()
+    + 验证可租()
+    + 临时锁定()
+    + 标记已预留()
+    + 核对归还装备()
+    + 更新位置与状态()
+    + 更换租赁装备()
+    + 验证可送修()
+    + 隔离并标记维修中()
+    + 提供状态数据()
+  }
+  }
+
+  together {
+  class "支付" as Payment <<entity>> {
+    - 支付请求号
+    - 支付类型
+    - 支付状态
+    - 支付流水号
+    - 支付时间
+    + 建立支付请求()
+    + 检查重复请求()
+    + 建立支付调整请求()
+    + 保存支付结果()
+  }
+  class "维修工单" as RepairOrder <<entity>> {
+    - 工单号
+    - 工单状态
+    - 故障说明
+    - 严重程度
+    - 预计完成时间
+    + 建立维修工单()
+    + 验证承包商权限()
+    + 保存维修进度()
+    + 标记待验收()
+    + 验收或确认退役()
+    + 提供维修数据()
+  }
+  class "审计事件" as Audit <<entity>> {
+    - 发生时间
+    - 状态变化
+    - 操作结果
+    + 记录状态变化()
+  }
+  class "经营统计" as Statistics <<entity>> {
+    - 统计范围
+    - 数据截止时间
+    + 汇总经营指标()
+    + 汇总已交付单数与租金()
+    + 核对排队等待()
+    + 汇总队列与环节积压()
+    + 汇总异常待办()
+    + 生成超时预警()
+  }
+  }
+
+  class "租赁明细" as RentalItem <<entity>> {
+    - 借出时间
+    - 归还时间
+    - 费用与状态
+  }
+  class "维修承包商" as Contractor <<entity>> {
+    - 承包商编号
+    - 名称
+    + 接收工单()
+  }
+  class "维修进度" as RepairProgress <<entity>> {
+    - 提交时间
+    - 进度状态
+    - 处理说明
+  }
+  class "安全检查" as SafetyInspection <<entity>> {
+    - 检查时间
+    - 检查结论
+    - 有效期
+  }
+
+  Customer -[hidden]right-> Store
+  Store -[hidden]right-> ServiceTask
+  ServiceTask -[hidden]right-> Contract
+  Contract -[hidden]right-> Equipment
+  Payment -[hidden]right-> RepairOrder
+  RepairOrder -[hidden]right-> Audit
+  Audit -[hidden]right-> Statistics
+  Customer -[hidden]down-> Payment
+  Store -[hidden]down-> RepairOrder
+  Contract -[hidden]down-> Audit
+  Equipment -[hidden]down-> Statistics
+
+  Customer "1" -- "0..*" Contract : 签订
+  Customer "1" -- "0..*" ServiceTask : 到店办理
+  Store "1" -- "0..*" ServiceTask : 排队
+  Store "1" -- "0..*" Contract : 办理
+  Store "1" -- "0..*" RepairOrder : 负责
+  Contractor "0..1" -- "0..*" RepairOrder : 承接
+  Store "1" -- "0..*" Equipment : 保管
+  Contract "1" *-- "1..*" RentalItem
+  Equipment "1" -- "0..*" RentalItem
+  Contract "1" *-- "0..*" Payment : 支付与费用调整
+  Equipment "1" -- "0..*" RepairOrder : 维修
+  RepairOrder "1" -down- "0..*" RepairProgress
+  RepairOrder "0..1" -down- "0..*" SafetyInspection : 验收
+  Equipment "1" -- "0..*" SafetyInspection
+  Contract "0..*" -- "0..*" Audit : 合同历史
+  RepairOrder "0..*" -- "0..*" Audit : 维修历史
+}
+
+BoundaryLayer -[hidden]down-> ControlLayer
+ControlLayer -[hidden]down-> EntityLayer
+QueryUI --> QueryControl
+CreateUI --> CreateControl
+ReturnUI --> ReturnControl
+SubmitRepairUI --> SubmitRepairControl
+RepairUI --> UpdateRepairControl
+ReportUI --> ReportControl
+CreateControl ..> PaymentGateway : 请求收费
+ReturnControl ..> PaymentGateway : 请求补款或退款
+
+' 控制类与实体类的动态协作在六张序列图中逐项展示，避免总体类图产生交叉线
+@enduml

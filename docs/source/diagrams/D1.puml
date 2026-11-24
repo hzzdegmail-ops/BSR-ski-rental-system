@@ -1,0 +1,174 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 11
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.0
+skinparam EntityBorderColor #315E57
+skinparam EntityBackgroundColor #FFFFFF
+skinparam EntityFontColor #173F39
+skinparam nodesep 12
+skinparam ranksep 24
+hide circle
+
+entity "CUSTOMER" as Customer #EAF6FB {
+  [PK] customer_id : BIGINT
+}
+entity "CUSTOMER_FIT_PROFILE" as FitProfile #EAF6FB {
+  [PK] profile_id : BIGINT
+  [FK][UQ] customer_id : BIGINT
+}
+entity "STORE" as Store #EEF7F2 {
+  [PK] store_id : BIGINT
+}
+entity "USER_ACCOUNT" as UserAccount #EEF7F2 {
+  [PK] user_id : BIGINT
+  [FK] store_id : BIGINT NULL
+  [FK] contractor_id : BIGINT NULL
+}
+entity "SERVICE_RESERVATION" as Reservation #FFF3DF {
+  [PK] reservation_id : BIGINT
+  [FK] customer_id : BIGINT
+  [FK] store_id : BIGINT
+}
+entity "SERVICE_TASK" as Task #FFF3DF {
+  [PK] task_id : BIGINT
+  [FK] reservation_id : BIGINT NULL
+  [FK] customer_id : BIGINT
+  [FK] store_id : BIGINT
+  [FK] assigned_user_id : BIGINT NULL
+}
+
+entity "EQUIPMENT_CATEGORY" as Category #EEF7F2 {
+  [PK] category_id : BIGINT
+}
+entity "EQUIPMENT_MODEL" as EquipmentModel #EEF7F2 {
+  [PK] model_id : BIGINT
+  [FK] category_id : BIGINT
+}
+entity "EQUIPMENT" as Equipment #EEF7F2 {
+  [PK] equipment_id : BIGINT
+  [FK] model_id : BIGINT
+  [FK] current_store_id : BIGINT
+}
+entity "EQUIPMENT_LOCATION_HISTORY" as LocationHistory #EAF6FB {
+  [PK] movement_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] from_store_id : BIGINT NULL
+  [FK] to_store_id : BIGINT
+  [FK] contract_id : BIGINT NULL
+  [FK] recorded_by_user_id : BIGINT
+}
+
+entity "RENTAL_CONTRACT" as Contract #FFF3DF {
+  [PK] contract_id : BIGINT
+  [FK][UQ] service_task_id : BIGINT
+  [FK] customer_id : BIGINT
+  [FK] pickup_store_id : BIGINT
+  [FK] return_store_id : BIGINT NULL
+}
+entity "RENTAL_ITEM" as RentalItem #FFF3DF {
+  [PK] rental_item_id : BIGINT
+  [FK] contract_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] replaces_item_id : BIGINT NULL
+}
+entity "PAYMENT_REQUEST" as PaymentRequest #FDEBEC {
+  [PK] payment_request_id : BIGINT
+  [FK] contract_id : BIGINT
+}
+entity "PAYMENT_TRANSACTION" as PaymentTransaction #FDEBEC {
+  [PK] transaction_id : BIGINT
+  [FK] payment_request_id : BIGINT
+}
+
+entity "REPAIR_CONTRACTOR" as Contractor #FFF3DF {
+  [PK] contractor_id : BIGINT
+}
+entity "REPAIR_ORDER" as RepairOrder #FFF3DF {
+  [FK] responsible_store_id : INTEGER NULL
+  [PK] repair_order_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] contractor_id : BIGINT NULL
+  [FK] created_by_user_id : BIGINT
+}
+entity "REPAIR_UPDATE" as RepairUpdate #FFF3DF {
+  [PK] repair_update_id : BIGINT
+  [FK] repair_order_id : BIGINT
+  [FK] submitted_by_user_id : BIGINT
+}
+entity "SAFETY_INSPECTION" as SafetyInspection #EEF7F2 {
+  [PK] inspection_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] repair_order_id : BIGINT NULL
+  [FK] inspector_user_id : BIGINT
+}
+entity "AUDIT_EVENT" as AuditEvent #FDEBEC {
+  [FK] event_store_id : INTEGER NULL
+  [PK] audit_event_id : BIGINT
+  [FK] actor_user_id : BIGINT NULL
+}
+entity "AUDIT_EVENT_TARGET" as AuditTarget #FDEBEC {
+  [PK] audit_target_id : BIGINT
+  [FK] audit_event_id : BIGINT
+}
+entity "VW_OPERATING_METRIC" as MetricView <<view>> #F2F2F2 {
+  metric_date : DATE
+  store_id : BIGINT
+  metric_code : VARCHAR(40)
+  metric_value : DECIMAL(14,2)
+  calculated_at : TIMESTAMP
+}
+
+Customer ||--o| FitProfile
+Customer ||--o{ Reservation
+Store ||--o{ Reservation
+Reservation |o--o{ Task
+Customer ||--o{ Task
+Store ||--o{ Task
+Store |o--o{ UserAccount
+UserAccount |o--o{ Task
+
+Category ||--o{ EquipmentModel
+EquipmentModel ||--o{ Equipment
+Store ||--o{ Equipment
+Equipment ||--o{ LocationHistory
+Store |o--o{ LocationHistory
+Store ||--o{ LocationHistory
+Contract |o--o{ LocationHistory
+UserAccount ||--o{ LocationHistory
+
+Task ||--o| Contract
+Customer ||--o{ Contract
+Store ||--o{ Contract
+Store |o--o{ Contract
+Contract ||--|{ RentalItem
+Equipment ||--o{ RentalItem
+' After SVG export run: python fix_erd_routes.py D1.svg
+RentalItem |o--o| RentalItem
+Contract ||--o{ PaymentRequest
+PaymentRequest ||--o{ PaymentTransaction
+
+Contractor |o--o{ UserAccount
+Store |o--o{ RepairOrder
+Store |o--o{ AuditEvent
+Equipment ||--o{ RepairOrder
+Contractor |o--o{ RepairOrder
+UserAccount ||--o{ RepairOrder
+RepairOrder ||--o{ RepairUpdate
+UserAccount ||--o{ RepairUpdate
+Equipment ||--o{ SafetyInspection
+RepairOrder |o--o{ SafetyInspection
+UserAccount ||--o{ SafetyInspection
+UserAccount |o--o{ AuditEvent
+AuditEvent ||--|{ AuditTarget
+
+Task ..> MetricView
+Contract ..> MetricView
+Equipment ..> MetricView
+LocationHistory ..> MetricView
+
+@enduml

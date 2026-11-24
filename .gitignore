@@ -1,0 +1,18 @@
+dist/
+public/
+node_modules/
+*.sqlite*
+.env*
+!.env.example
+data/
+.session-key
+
+# Local deployment settings and report build output
+.vercel/
+*.pem
+*.key
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz

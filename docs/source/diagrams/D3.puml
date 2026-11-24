@@ -1,0 +1,83 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.1
+skinparam EntityBorderColor #315E57
+skinparam EntityBackgroundColor #FFFFFF
+skinparam EntityFontColor #173F39
+hide circle
+
+entity "STORE" as Store <<reference>> #F2F2F2 {
+  [PK] store_id : BIGINT
+}
+
+entity "USER_ACCOUNT" as UserAccount <<reference>> #F2F2F2 {
+  [PK] user_id : BIGINT
+}
+
+entity "RENTAL_CONTRACT" as Contract <<reference>> #F2F2F2 {
+  [PK] contract_id : BIGINT
+}
+
+entity "EQUIPMENT_CATEGORY" as Category #EEF7F2 {
+  [PK] category_id : BIGINT
+  [UQ] category_code : VARCHAR(30)
+  --
+  name : NVARCHAR(80)
+  safety_interval_days : INTEGER
+  active : BOOLEAN
+}
+
+entity "EQUIPMENT_MODEL" as EquipmentModel #EEF7F2 {
+  [PK] model_id : BIGINT
+  [FK] category_id : BIGINT
+  [UQ] model_code : VARCHAR(40)
+  --
+  brand : NVARCHAR(80)
+  model_name : NVARCHAR(120)
+  size_spec : VARCHAR(30)
+  skill_level : VARCHAR(20)
+  compatibility_rule : JSON/TEXT
+}
+
+entity "EQUIPMENT" as Equipment #EEF7F2 {
+  [PK] equipment_id : BIGINT
+  [UQ] asset_no : VARCHAR(40)
+  [FK] model_id : BIGINT
+  [FK] current_store_id : BIGINT
+  --
+  legacy_asset_no : VARCHAR(40) NULL
+  status : VARCHAR(30)
+  acquired_at : DATE
+  retired_at : DATE NULL
+  version : INTEGER
+}
+
+entity "EQUIPMENT_LOCATION_HISTORY" as LocationHistory #EAF6FB {
+  [PK] movement_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] from_store_id : BIGINT NULL
+  [FK] to_store_id : BIGINT
+  [FK] contract_id : BIGINT NULL
+  [FK] recorded_by_user_id : BIGINT
+  --
+  movement_type : VARCHAR(30)
+  moved_at : TIMESTAMP
+  note : NVARCHAR(255) NULL
+}
+
+Category ||--o{ EquipmentModel
+EquipmentModel ||--o{ Equipment
+Store ||--o{ Equipment
+Equipment ||--o{ LocationHistory
+Store |o--o{ LocationHistory : 原门店
+Store ||--o{ LocationHistory : 目标门店
+Contract |o--o{ LocationHistory
+UserAccount ||--o{ LocationHistory
+
+@enduml

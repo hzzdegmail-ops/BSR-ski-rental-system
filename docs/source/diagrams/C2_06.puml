@@ -1,0 +1,43 @@
+@startuml
+hide footbox
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam ArrowColor #315E57
+skinparam ParticipantBorderColor #315E57
+skinparam ParticipantBackgroundColor #D8EEE5
+skinparam LifeLineBorderColor #789D94
+autonumber
+
+actor "经理" as Manager
+boundary "经营与待办界面" as UI
+control "查看经营与待办控制" as Control
+entity "预约与办理任务" as ServiceTask
+entity "租赁合同" as Contract
+entity "装备" as Equipment
+entity "维修工单" as RepairOrder
+entity "经营统计" as Statistics
+
+Manager -> UI : 提交统计条件(日期、门店)
+UI -> Control : 查看经营与待办(统计条件)
+activate Control
+Control -> ServiceTask : 提供排队与办理数据(统计范围)
+ServiceTask --> Control : 返回队列、当前环节和办理时长
+Control -> Contract : 提供租赁数据(统计范围)
+Contract --> Control : 返回交付日期、取件门店及合同租金
+Control -> Equipment : 提供状态数据(统计范围)
+Equipment --> Control : 返回装备状态数据
+Control -> RepairOrder : 提供维修数据(统计范围)
+RepairOrder --> Control : 返回维修数据
+Control -> Statistics : 汇总经营指标(业务数据)
+Statistics -> Statistics : 汇总交付单数、约定租金与利用率()
+Statistics -> Statistics : 核对等待样本，跨日或缺失则提示待核对
+Statistics -> Statistics : 其他业务数量收进明细
+Statistics -> Statistics : 汇总异常待办()
+Statistics -> Statistics : 生成超时预警(等待时长、支付、归还、维修)
+Statistics --> Control : 返回经营指标、待办、预警和数据截止时间
+Control --> UI : 返回经营信息、待办与超时预警
+deactivate Control
+UI --> Manager : 展示经营信息、待办与超时预警
+@enduml

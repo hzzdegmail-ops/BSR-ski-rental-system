@@ -1,0 +1,32 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+state "待分配" as U
+state "待接收" as A
+state "维修中" as W
+state "待验收" as V
+state "待确认退役" as R
+state "已关闭" as C
+state "已退役" as X
+[*] --> U : 暂无承包商 / 隔离装备
+[*] --> A : 指定承包商 / 隔离装备
+U --> A : 责任门店分配
+A --> W : 接单填写预计完成时间
+A --> V : 已修复直接上报
+A --> R : 上报无法修复
+W --> W : 更新进度或预计时间
+W --> V : 上报完工
+W --> R : 上报无法修复
+V --> C : 验收合格 / 装备恢复可租
+V --> W : 验收不合格
+R --> X : 确认退役 / 装备永久不可租
+R --> W : 退回维修
+C --> [*]
+X --> [*]
+@enduml

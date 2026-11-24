@@ -1,0 +1,42 @@
+@startuml
+top to bottom direction
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam linetype ortho
+skinparam ArrowColor #315E57
+skinparam ActorBorderColor #315E57
+skinparam UsecaseBorderColor #0B8069
+skinparam UsecaseBackgroundColor #EDF7F2
+skinparam RectangleBorderColor #0B8069
+skinparam ranksep 18
+skinparam nodesep 25
+
+actor "门店员工" as Staff
+rectangle "BSR 滑雪装备租赁与维护管理系统" {
+  usecase "UC01 接待顾客并推荐装备" as U1
+  usecase "UC02 创建合同并收费" as U2
+  usecase "UC03 办理换装与归还" as U3
+  usecase "UC04 提交维修工单" as U4
+  usecase "UC05 更新维修进度" as U5
+  usecase "UC06 查看经营与待办" as U6
+  U1 -[hidden]down-> U2
+  U2 -[hidden]down-> U3
+  U3 -[hidden]down-> U4
+  U4 -[hidden]down-> U5
+  U5 -[hidden]down-> U6
+}
+
+actor "第三方支付\n（课程模拟）" as Pay
+actor "维修承包商" as Repair
+actor "经理" as Manager
+Staff -right-> U1
+Staff -right-> U2
+Staff -right-> U3
+Staff -right-> U4
+Staff -right-> U5 : 验收与退役确认
+U2 -right-> Pay
+U3 -right-> Pay
+Repair -left-> U5
+Manager -left-> U6
+@enduml

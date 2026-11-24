@@ -1,0 +1,18 @@
+{
+  "name": "bsr-rental-maintenance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node build-vercel.mjs && node --test",
+    "start": "node local.mjs",
+    "build": "node build.mjs",
+    "start:server": "node cloud.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "2.9.0"
+  }
+}

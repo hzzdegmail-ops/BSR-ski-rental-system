@@ -1,0 +1,73 @@
+@startuml
+!pragma layout smetana
+hide footbox
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 14
+skinparam ArrowColor #315E57
+skinparam ParticipantBorderColor #315E57
+skinparam ParticipantBackgroundColor #D8EEE5
+skinparam LifeLineBorderColor #789D94
+autonumber
+
+actor "门店员工" as Clerk
+boundary "换装与归还界面" as UI
+control "办理换装与归还控制" as Control
+entity "租赁合同" as Contract
+entity "装备" as Equipment
+boundary "支付服务接口（模拟）" as PayGateway
+entity "支付" as Payment
+entity "审计事件" as Audit
+
+Clerk -> UI : 提交识别信息(合同号或装备编号)
+UI -> Control : 识别在租合同(识别信息)
+activate Control
+Control -> Contract : 查找租出合同(识别信息)
+Contract --> Control : 返回合同和应还装备
+Control --> UI : 返回当前装备、价格和归还信息
+UI --> Clerk : 展示可换装或归还信息
+Clerk -> UI : 提交处理信息(处理方式、实际装备、门店、检查结果)
+UI -> Control : 办理换装与归还(处理信息)
+Control -> Equipment : 核对归还装备(合同装备、实际装备、检查结果)
+Equipment --> Control : 返回核对结果
+alt 选择换装
+  Control -> Equipment : 查询可租装备(适配条件、剩余租期)
+  Equipment --> Control : 返回候选替换装备
+  Control -> Contract : 计算换装价差(新旧装备、剩余租期)
+  Contract --> Control : 返回费用调整类型和金额
+else 选择归还
+  Control -> Contract : 计算归还费用调整(核对结果、实际归还时间)
+  Contract --> Control : 返回费用调整类型和金额
+end
+opt 需要补款或退款
+  opt 换装
+    Control -> Equipment : 临时锁定替换装备
+  end
+  Control -> Payment : 建立支付调整请求(合同号、类型、金额)
+  Payment --> Control : 返回唯一支付调整请求号
+  Control -> Payment : 检查重复请求(支付调整请求号)
+  Payment --> Control : 返回尚未处理
+  Control -> PayGateway : 请求补款或退款(请求号、类型、金额)
+  PayGateway --> Control : 返回支付调整结果
+  Control -> Payment : 保存支付结果(请求号、结果)
+end
+alt 换装无需调整费用或支付成功
+  Control -> Contract : 记录新旧装备和价差
+  Control -> Equipment : 释放或隔离旧件，将新件标为租出
+else 换装补款失败或锁定到期
+  Control -> Equipment : 释放替换装备，原租赁明细保留
+else 换装费用待处理
+  Control --> UI : 保留原合同，按原请求号处理
+else 归还
+  Control -> Contract : 记录归还，缺失时进入处理异常
+  Control -> Equipment : 更新实收装备的位置与状态
+  opt 退款或补款未结清
+    Control --> UI : 显示费用待处理，可按原请求号重试
+  end
+end
+Control -> Audit : 记录状态变化(合同号、处理结果)
+Control --> UI : 返回处理结果和费用明细
+deactivate Control
+UI --> Clerk : 反馈办理结果
+@enduml

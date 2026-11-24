@@ -1,0 +1,44 @@
+@startuml
+hide footbox
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+actor "维修承包商" as Vendor
+actor "责任门店员工" as Clerk
+boundary "维修进度界面" as UI
+control "更新维修进度控制" as S
+entity "维修工单" as Order
+entity "维修进度" as Progress
+entity "安全检查" as Inspection
+entity "装备" as Equipment
+entity "审计事件" as Audit
+Vendor -> UI : 打开获分配工单
+UI -> S : 查询工单详情
+S -> Order : 验证分派，读取工单
+S -> Progress : 读取历史进度
+S --> UI : 显示进度及预计完成时间
+Vendor -> UI : 提交处理说明及结果
+UI -> S : 更新维修进度
+alt 接单或继续维修
+  S -> Order : 保存维修中及预计完成时间
+else 完工或建议退役
+  S -> Order : 更新为待验收或待确认退役
+end
+S -> Progress : 写入进度记录
+S -> Audit : 写入状态变化
+opt 工单等待验收或退役确认
+  Clerk -> UI : 提交验收或退役结论
+  UI -> S : 校验责任门店及工单状态
+  S -> Inspection : 保存检查结论
+  S -> Order : 关闭、退役或退回维修
+  S -> Equipment : 按结论更新装备状态
+  S -> Progress : 记录处理结果
+  S -> Audit : 写入验收审计
+  S --> UI : 显示结果
+end
+@enduml

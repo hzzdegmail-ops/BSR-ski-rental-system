@@ -1,0 +1,94 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.1
+skinparam EntityBorderColor #315E57
+skinparam EntityBackgroundColor #FFFFFF
+skinparam EntityFontColor #173F39
+hide circle
+
+entity "CUSTOMER" as Customer <<reference>> #F2F2F2 {
+  [PK] customer_id : BIGINT
+}
+
+entity "STORE" as Store <<reference>> #F2F2F2 {
+  [PK] store_id : BIGINT
+}
+
+entity "SERVICE_TASK" as Task <<reference>> #F2F2F2 {
+  [PK] task_id : BIGINT
+}
+
+entity "EQUIPMENT" as Equipment <<reference>> #F2F2F2 {
+  [PK] equipment_id : BIGINT
+}
+
+entity "RENTAL_CONTRACT" as Contract #FFF3DF {
+  [PK] contract_id : BIGINT
+  [UQ] contract_no : VARCHAR(40)
+  [FK][UQ] service_task_id : BIGINT
+  [FK] customer_id : BIGINT
+  [FK] pickup_store_id : BIGINT
+  [FK] return_store_id : BIGINT NULL
+  --
+  start_at : TIMESTAMP
+  end_at : TIMESTAMP
+  status : VARCHAR(30)
+  amount_due : DECIMAL(12,2)
+  price_snapshot : JSON/TEXT
+  version : INTEGER
+}
+
+entity "RENTAL_ITEM" as RentalItem #FFF3DF {
+  [PK] rental_item_id : BIGINT
+  [FK] contract_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] replaces_item_id : BIGINT NULL
+  --
+  rented_from : TIMESTAMP
+  rented_to : TIMESTAMP NULL
+  quoted_price : DECIMAL(12,2)
+  item_status : VARCHAR(30)
+  [UQ] contract_id, equipment_id, rented_from
+}
+
+entity "PAYMENT_REQUEST" as PaymentRequest #FDEBEC {
+  [PK] payment_request_id : BIGINT
+  [UQ] request_no : VARCHAR(64)
+  [FK] contract_id : BIGINT
+  --
+  request_type : VARCHAR(20)
+  amount : DECIMAL(12,2)
+  status : VARCHAR(30)
+  created_at : TIMESTAMP
+}
+
+entity "PAYMENT_TRANSACTION" as PaymentTransaction #FDEBEC {
+  [PK] transaction_id : BIGINT
+  [FK] payment_request_id : BIGINT
+  [UQ] provider_transaction_no : VARCHAR(80) NULL
+  [UQ] payment_request_id, attempt_no
+  --
+  attempt_no : INTEGER
+  amount : DECIMAL(12,2)
+  status : VARCHAR(30)
+  response_code : VARCHAR(40) NULL
+  processed_at : TIMESTAMP NULL
+}
+
+Task ||--o| Contract
+Customer ||--o{ Contract
+Store ||--o{ Contract : 取件门店
+Store |o--o{ Contract : 实际归还门店
+Contract ||--|{ RentalItem
+Equipment ||--o{ RentalItem
+RentalItem |o--o| RentalItem
+Contract ||--o{ PaymentRequest
+PaymentRequest ||--o{ PaymentTransaction
+
+@enduml

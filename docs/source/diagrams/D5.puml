@@ -1,0 +1,111 @@
+@startuml
+skinparam linetype ortho
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+skinparam ArrowColor #315E57
+skinparam ArrowThickness 1.1
+skinparam EntityBorderColor #315E57
+skinparam EntityBackgroundColor #FFFFFF
+skinparam EntityFontColor #173F39
+hide circle
+
+entity "STORE" as Store <<reference>> #F2F2F2 {
+  [PK] store_id : BIGINT
+}
+
+entity "EQUIPMENT" as Equipment <<reference>> #F2F2F2 {
+  [PK] equipment_id : BIGINT
+}
+
+entity "USER_ACCOUNT" as UserAccount <<reference>> #F2F2F2 {
+  [PK] user_id : BIGINT
+  [FK] contractor_id : BIGINT NULL
+}
+
+entity "REPAIR_CONTRACTOR" as Contractor #FFF3DF {
+  [PK] contractor_id : BIGINT
+  [UQ] contractor_code : VARCHAR(30)
+  --
+  name : NVARCHAR(120)
+  contact_phone : VARCHAR(30)
+  active : BOOLEAN
+}
+
+entity "REPAIR_ORDER" as RepairOrder #FFF3DF {
+  [PK] repair_order_id : BIGINT
+  [UQ] ticket_no : VARCHAR(40)
+  [FK] equipment_id : BIGINT
+  [FK] contractor_id : BIGINT NULL
+  [FK] created_by_user_id : BIGINT
+  --
+  status : VARCHAR(30)
+  fault_description : NVARCHAR(500)
+  opened_at : TIMESTAMP
+  [FK] responsible_store_id : INTEGER NULL
+  severity : TEXT NULL
+  estimated_completion_at : TIMESTAMP NULL
+  completed_at : TIMESTAMP NULL
+  version : INTEGER
+}
+
+entity "REPAIR_UPDATE" as RepairUpdate #FFF3DF {
+  [PK] repair_update_id : BIGINT
+  [FK] repair_order_id : BIGINT
+  [FK] submitted_by_user_id : BIGINT
+  --
+  progress_status : VARCHAR(30)
+  note : NVARCHAR(500)
+  created_at : TIMESTAMP
+}
+
+entity "SAFETY_INSPECTION" as SafetyInspection #EEF7F2 {
+  [PK] inspection_id : BIGINT
+  [FK] equipment_id : BIGINT
+  [FK] repair_order_id : BIGINT NULL
+  [FK] inspector_user_id : BIGINT
+  --
+  result : VARCHAR(30)
+  inspected_at : TIMESTAMP
+  valid_until : DATE NULL
+  note : NVARCHAR(500) NULL
+}
+
+entity "AUDIT_EVENT" as AuditEvent #FDEBEC {
+  [PK] audit_event_id : BIGINT
+  [FK] actor_user_id : BIGINT NULL
+  --
+  event_type : VARCHAR(40)
+  from_status : VARCHAR(30) NULL
+  to_status : VARCHAR(30) NULL
+  result : VARCHAR(30)
+  [FK] event_store_id : INTEGER NULL
+  occurred_at : TIMESTAMP
+}
+
+entity "AUDIT_EVENT_TARGET" as AuditTarget #FDEBEC {
+  [PK] audit_target_id : BIGINT
+  [FK] audit_event_id : BIGINT
+  --
+  entity_type : VARCHAR(40)
+  entity_id : BIGINT
+  [UQ] audit_event_id, entity_type, entity_id
+}
+
+Contractor |o--o{ UserAccount
+Equipment ||--o{ RepairOrder
+Contractor |o--o{ RepairOrder
+UserAccount ||--o{ RepairOrder
+RepairOrder ||--o{ RepairUpdate
+UserAccount ||--o{ RepairUpdate
+Equipment ||--o{ SafetyInspection
+RepairOrder |o--o{ SafetyInspection
+UserAccount ||--o{ SafetyInspection
+UserAccount |o--o{ AuditEvent
+AuditEvent ||--|{ AuditTarget
+
+Store |o--o{ RepairOrder
+Store |o--o{ AuditEvent
+@enduml

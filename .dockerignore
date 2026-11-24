@@ -1,0 +1,9 @@
+node_modules
+dist
+public
+.git
+.env*
+*.sqlite*
+data
+.session-key
+test

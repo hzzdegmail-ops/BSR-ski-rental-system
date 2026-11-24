@@ -1,0 +1,21 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+state "租出" as O
+state "处理异常" as E
+state "已归还" as R
+[*] --> O : 实际交付
+O --> O : 换装完成或失败 / 按结果更新装备
+O --> E : 归还时发现装备缺失
+O --> R : 装备齐全 / 更新状态与位置
+E --> R : 补齐缺失装备后归还
+E --> E : 仍有未归还装备
+R --> R : 继续处理补款或退款
+R --> [*] : 所有事项结清
+@enduml

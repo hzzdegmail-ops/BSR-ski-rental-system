@@ -1,0 +1,19 @@
+@startuml
+!pragma layout smetana
+skinparam backgroundColor white
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 15
+skinparam shadowing false
+skinparam ArrowColor #315E57
+skinparam StateBackgroundColor #EDF7F2
+skinparam StateBorderColor #315E57
+state "维修中" as W
+state "可租" as C
+state "退役" as X
+[*] --> W : 送修隔离
+W --> W : 工单处理、待验收或待确认退役
+W --> C : 责任门店验收合格
+W --> X : 责任门店确认退役
+C --> [*]
+X --> [*]
+@enduml

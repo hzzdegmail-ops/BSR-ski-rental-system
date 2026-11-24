@@ -1,0 +1,38 @@
+@startuml
+skinparam linetype ortho
+left to right direction
+
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #315E57
+skinparam ActorBorderColor #315E57
+skinparam ActorFontColor #173F39
+skinparam UsecaseBorderColor #0B8069
+skinparam UsecaseBackgroundColor #EDF7F2
+skinparam UsecaseFontColor #173F39
+skinparam RectangleBorderColor #0B8069
+skinparam RectangleFontColor #173F39
+skinparam packageStyle rectangle
+skinparam ranksep 60
+skinparam nodesep 35
+
+together {
+  actor/ "顾客" as Customer
+  actor/ "维修承包商" as Repairer
+}
+
+rectangle "BSR 滑雪租赁公司" as BSR {
+  usecase/ "租赁合适的滑雪装备" as UC_Rent
+  usecase/ "换装或跨店归还装备" as UC_Return
+  usecase/ "协同处理装备维修" as UC_Repair
+}
+
+actor/ "第三方支付服务" as Payment
+
+Customer --> UC_Rent
+Customer --> UC_Return
+Repairer --> UC_Repair
+UC_Rent --> Payment
+
+@enduml

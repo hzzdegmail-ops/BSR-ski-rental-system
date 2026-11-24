@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="594" viewBox="0 0 900 594" role="img" aria-labelledby="title desc">
+<title id="title">BSR 系统用例图</title>
+<desc id="desc">门店员工参与前五个用例，支付服务参与合同收费和换装归还。维修承包商参与更新维修进度，经理查看经营与待办。</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 9 8" refX="8.1" refY="4" markerWidth="8" markerHeight="7" orient="auto">
+    <path d="M0 0 L9 4 L0 8 L2.3 4 Z" fill="#315E57"/>
+  </marker>
+</defs>
+<style>
+ text{font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;fill:#173C34}
+ .relation{fill:none;stroke:#315E57;stroke-width:1.55;stroke-linejoin:round;marker-end:url(#arrow)}
+ .actor{fill:none;stroke:#315E57;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+</style>
+<rect x="274" y="14" width="362" height="550" rx="8" fill="#fff" stroke="#286D5C" stroke-width="1.8"/>
+<text x="455" y="44" font-size="20" text-anchor="middle" font-weight="700">BSR 滑雪装备租赁与维护管理系统</text>
+<line x1="294" y1="61" x2="616" y2="61" stroke="#D4E5DD"/>
+
+<path class="relation" d="M94 237 H144 V102 H311"/>
+<path class="relation" d="M94 247 H182 V186 H311"/>
+<path class="relation" d="M94 257 H216 V270 H311"/>
+<path class="relation" d="M94 267 H185 V354 H311"/>
+<path class="relation" d="M94 277 H145 V438 H311"/>
+<path class="relation" d="M599 186 H704 V213 H792"/>
+<path class="relation" d="M599 270 H723 V247 H792"/>
+<path class="relation" d="M792 419 H739 V438 H599"/>
+<path class="relation" d="M792 522 H599"/>
+<text x="207" y="426" font-size="14" text-anchor="middle">验收与退役确认</text>
+<ellipse cx="455" cy="102" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="108.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC01</tspan><tspan dx="12">接待顾客并推荐装备</tspan></text>
+<ellipse cx="455" cy="186" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="192.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC02</tspan><tspan dx="12">创建合同并收费</tspan></text>
+<ellipse cx="455" cy="270" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="276.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC03</tspan><tspan dx="12">办理换装与归还</tspan></text>
+<ellipse cx="455" cy="354" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="360.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC04</tspan><tspan dx="12">提交维修工单</tspan></text>
+<ellipse cx="455" cy="438" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="444.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC05</tspan><tspan dx="12">更新维修进度</tspan></text>
+<ellipse cx="455" cy="522" rx="143" ry="28" fill="#ECF6F1" stroke="#38806E" stroke-width="1.3"/>
+<text x="455" y="528.5" font-size="18" text-anchor="middle"><tspan fill="#286151" font-weight="700">UC06</tspan><tspan dx="12">查看经营与待办</tspan></text>
+<g transform="translate(75 257)">
+<circle cx="0" cy="-27" r="9" stroke="#315E57" stroke-width="1.75" fill="#ECF6F1"/>
+<path class="actor" d="M0 -18 V10 M-17 -8 H17 M0 10 L-16 30 M0 10 L16 30"/>
+<text x="0" y="54" font-size="17" font-weight="600" text-anchor="middle">门店员工</text>
+
+</g>
+<g transform="translate(817 230)">
+<circle cx="0" cy="-27" r="9" stroke="#315E57" stroke-width="1.75" fill="#ECF6F1"/>
+<path class="actor" d="M0 -18 V10 M-17 -8 H17 M0 10 L-16 30 M0 10 L16 30"/>
+<text x="0" y="54" font-size="17" font-weight="600" text-anchor="middle">第三方支付</text>
+<text x="0" y="73" font-size="14" text-anchor="middle">（课程模拟）</text>
+</g>
+<g transform="translate(817 419)">
+<circle cx="0" cy="-27" r="9" stroke="#315E57" stroke-width="1.75" fill="#ECF6F1"/>
+<path class="actor" d="M0 -18 V10 M-17 -8 H17 M0 10 L-16 30 M0 10 L16 30"/>
+<text x="0" y="54" font-size="17" font-weight="600" text-anchor="middle">维修承包商</text>
+
+</g>
+<g transform="translate(817 522)">
+<circle cx="0" cy="-27" r="9" stroke="#315E57" stroke-width="1.75" fill="#ECF6F1"/>
+<path class="actor" d="M0 -18 V10 M-17 -8 H17 M0 10 L-16 30 M0 10 L16 30"/>
+<text x="0" y="54" font-size="17" font-weight="600" text-anchor="middle">经理</text>
+
+</g>
+</svg>
