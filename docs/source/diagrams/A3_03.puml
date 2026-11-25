@@ -1,0 +1,51 @@
+@startuml
+!include business_symbols.iuml
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #315E57
+skinparam LifeLineBorderColor #7A9892
+skinparam LifeLineBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor transparent
+skinparam ParticipantBackgroundColor transparent
+skinparam ParticipantFontColor #173F39
+skinparam ActorBorderColor #315E57
+skinparam ActorFontColor #173F39
+skinparam EntityBorderColor #315E57
+skinparam EntityFontColor #173F39
+hide footbox
+
+participant "<$business_worker>\n门店员工" as Clerk
+participant "<$business_entity>\nExcel 工作簿" as Excel
+participant "<$business_entity>\n纸质维修登记簿" as Paper
+participant "<$business_actor>\n维修承包商" as Repairer
+
+Clerk -> Clerk : 发现装备故障并进行初步检查()
+activate Clerk
+Clerk -> Excel : 查询装备编号、位置和出租状态()
+activate Excel
+Excel --> Clerk : 返回可能滞后的装备记录
+deactivate Excel
+Clerk -> Paper : 填写维修登记(装备、故障、日期)
+activate Paper
+Paper --> Clerk : 返回纸质维修编号
+deactivate Paper
+
+Clerk -> Repairer : 电话报修并约定交接(维修编号、故障描述)
+activate Repairer
+Repairer --> Clerk : 返回接单和预计完成时间
+Clerk -> Repairer : 线下交接故障装备()
+Repairer --> Clerk : 电话反馈维修进度和完成结果
+deactivate Repairer
+Clerk -> Clerk : 人工复核装备安全状况()
+Clerk -> Paper : 登记维修结果和检查结论()
+activate Paper
+Paper --> Clerk : 返回登记完成
+deactivate Paper
+Clerk -> Excel : 手工更新维修状态和装备可租状态()
+activate Excel
+Excel --> Clerk : 返回保存结果
+deactivate Excel
+deactivate Clerk
+
+@enduml

@@ -1,0 +1,68 @@
+@startuml
+!include business_symbols.iuml
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #315E57
+skinparam LifeLineBorderColor #7A9892
+skinparam LifeLineBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor transparent
+skinparam ParticipantBackgroundColor transparent
+skinparam ParticipantFontColor #173F39
+skinparam ActorBorderColor #315E57
+skinparam ActorFontColor #173F39
+skinparam EntityBorderColor #315E57
+skinparam EntityFontColor #173F39
+hide footbox
+
+participant "<$business_actor>\n顾客" as Customer
+participant "<$business_worker>\n门店员工" as Clerk
+participant "<$business_entity>\n租赁与维护管理系统" as System
+participant "<$business_actor>\n第三方支付服务" as Pay
+
+Customer -> Clerk : 提出换装或跨店归还申请(合同号、装备)
+activate Clerk
+Clerk -> System : 查询有效合同与装备状态(合同号、受理门店)
+activate System
+System -> System : 校验合同、租期、原门店、装备位置与占用状态()
+System --> Clerk : 返回合同明细与可办理方式
+deactivate System
+Clerk -> Clerk : 检查装备并记录归还时间、损坏与安全情况()
+
+alt 选择换装
+  Clerk -> System : 查询并锁定替换装备(适配条件、剩余租期)
+  activate System
+  System -> System : 校验适配、预约冲突、维修与安全状态()
+  System -> System : 计算换装差价()
+  System --> Clerk : 返回替换装备与费用调整
+  deactivate System
+else 选择归还
+  Clerk -> System : 计算归还费用调整(检查结果、实际归还时间)
+  activate System
+  System --> Clerk : 返回费用调整类型与金额
+  deactivate System
+end
+
+opt 需要补款或退款
+  Clerk -> System : 建立唯一支付调整请求(合同号、类型、金额)
+  activate System
+  System -> Pay : 请求补款或退款(请求号、金额)
+  activate Pay
+  Pay --> System : 返回支付调整结果
+  deactivate Pay
+  System --> Clerk : 返回支付凭证
+  deactivate System
+end
+
+Clerk -> System : 确认换装或归还结果(检查结论、支付结果)
+activate System
+System -> System : 更新合同、装备位置与状态并记录审计轨迹()
+System --> Clerk : 返回办理结果与费用明细
+deactivate System
+Clerk -> Customer : 交付替换装备或电子归还凭证()
+activate Customer
+Customer --> Clerk : 返回确认
+deactivate Customer
+deactivate Clerk
+
+@enduml

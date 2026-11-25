@@ -1,5 +1,4 @@
 @startuml
-skinparam linetype ortho
 left to right direction
 
 skinparam defaultFontName Microsoft YaHei
@@ -14,12 +13,13 @@ skinparam UsecaseFontColor #173F39
 skinparam RectangleBorderColor #0B8069
 skinparam RectangleFontColor #173F39
 skinparam packageStyle rectangle
+skinparam linetype polyline
 skinparam ranksep 60
 skinparam nodesep 35
 
 together {
-  actor/ "顾客" as Customer
-  actor/ "维修承包商" as Repairer
+  actor "顾客" as Customer
+  actor "维修承包商" as Repairer
 }
 
 rectangle "BSR 滑雪租赁公司" as BSR {
@@ -28,7 +28,7 @@ rectangle "BSR 滑雪租赁公司" as BSR {
   usecase/ "协同处理装备维修" as UC_Repair
 }
 
-actor/ "第三方支付服务" as Payment
+actor "第三方支付服务" as Payment
 
 Customer --> UC_Rent
 Customer --> UC_Return

@@ -1,0 +1,54 @@
+@startuml
+!include business_symbols.iuml
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #315E57
+skinparam LifeLineBorderColor #7A9892
+skinparam LifeLineBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor transparent
+skinparam ParticipantBackgroundColor transparent
+skinparam ParticipantFontColor #173F39
+skinparam ActorBorderColor #315E57
+skinparam ActorFontColor #173F39
+skinparam EntityBorderColor #315E57
+skinparam EntityFontColor #173F39
+hide footbox
+
+participant "<$business_worker>\n门店员工" as Clerk
+participant "<$business_entity>\n租赁与维护管理系统" as System
+participant "<$business_actor>\n维修承包商" as Repairer
+
+Clerk -> System : 提交维修工单(装备、故障、承包商)
+activate System
+System -> System : 校验装备未出租并生成唯一工单()
+System -> System : 将装备标记为维修中并暂停出租()
+System --> Repairer : 分派维修工单(工单号、故障描述)
+activate Repairer
+Repairer --> System : 接单并提交预计完成时间
+System --> Clerk : 返回工单编号、装备状态与预计时间
+deactivate System
+
+Repairer -> System : 更新维修进度(工单号、阶段、说明)
+activate System
+System -> System : 追加进度记录并更新门店待办()
+System --> Clerk : 返回最新维修进度
+deactivate System
+Repairer -> System : 提交维修完成结果(工单号、维修说明)
+activate System
+System -> System : 将工单转为待安全检查()
+System --> Clerk : 生成安全检查待办
+deactivate System
+deactivate Repairer
+Clerk -> System : 提交安全检查结果(工单号、结论)
+activate System
+alt 检查合格
+  System -> System : 关闭工单并恢复装备可租状态()
+else 检查不合格
+  System -> System : 保持维修状态并重新生成维修待办()
+end
+System -> System : 记录状态变化与审计轨迹()
+System --> Clerk : 返回工单和装备最终状态
+deactivate System
+
+@enduml

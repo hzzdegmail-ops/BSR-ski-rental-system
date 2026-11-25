@@ -1,0 +1,61 @@
+@startuml
+!include business_symbols.iuml
+skinparam defaultFontName Microsoft YaHei
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam ArrowColor #315E57
+skinparam LifeLineBorderColor #7A9892
+skinparam LifeLineBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor transparent
+skinparam ParticipantBackgroundColor transparent
+skinparam ParticipantFontColor #173F39
+skinparam ActorBorderColor #315E57
+skinparam ActorFontColor #173F39
+skinparam EntityBorderColor #315E57
+skinparam EntityFontColor #173F39
+hide footbox
+
+participant "<$business_actor>\n顾客" as Customer
+participant "<$business_worker>\n受理门店员工" as Clerk
+participant "<$business_entity>\n纸质租赁合同" as Paper
+participant "<$business_entity>\nExcel 工作簿" as Excel
+participant "<$business_worker>\n原门店员工" as Origin
+participant "<$business_actor>\n第三方支付服务" as Pay
+
+Customer -> Clerk : 提出换装或跨店归还申请(合同号、装备)
+activate Clerk
+Clerk -> Paper : 查找纸质合同和租期记录()
+activate Paper
+Paper --> Clerk : 返回合同记录
+deactivate Paper
+Clerk -> Excel : 查询装备、出租和门店记录()
+activate Excel
+Excel --> Clerk : 返回本店保存的记录
+deactivate Excel
+
+Clerk -> Origin : 电话核对合同、装备位置和出租状态()
+activate Origin
+Origin --> Clerk : 返回原门店登记信息
+deactivate Origin
+Clerk -> Clerk : 人工检查装备并计算差价、逾期或损坏费用()
+opt 需要补款或退款
+  Clerk -> Pay : 办理补款或退款(合同号、金额)
+  activate Pay
+  Pay --> Clerk : 返回支付调整结果
+  deactivate Pay
+end
+Clerk -> Paper : 手工登记换装或归还结果()
+activate Paper
+Paper --> Clerk : 返回登记完成
+deactivate Paper
+Clerk -> Excel : 手工更新装备位置与状态()
+activate Excel
+Excel --> Clerk : 返回保存结果
+deactivate Excel
+Clerk -> Customer : 交付替换装备或归还凭证()
+activate Customer
+Customer --> Clerk : 返回确认
+deactivate Customer
+deactivate Clerk
+
+@enduml
